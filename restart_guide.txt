@@ -1,0 +1,70 @@
+# ClipStream Bot - Restart Guide
+
+So you need to restart everything? Here are the commands for every situation.
+
+## 1. Local Development (Your Mac)
+If you are testing locally with `uvicorn` and `ngrok`.
+
+1.  **Stop everything:**
+    - Go to the terminal tabs running the bot and ngrok.
+    - Press `Ctrl + C` in each tab to stop them.
+
+2.  **Start everything:**
+    - **Tab 1 (The Bot):**
+      ```bash
+      uvicorn main:app --reload
+      ```
+    - **Tab 2 (The Tunnel):**
+      ```bash
+      ngrok http 8000
+      ```
+
+3.  **If it says "Address already in use":**
+    - Run this "Nuke" command to kill the zombie process:
+      ```bash
+      lsof -i :8000 | grep LISTEN | awk '{print $2}' | xargs kill -9
+      ```
+    - Then try starting `uvicorn` again.
+
+---
+
+## 2. Production Server (VPS / Home Server)
+If you followed the deployment guide and are using `systemd`.
+
+1.  **Restart the Bot Service:**
+    (Use this if you changed `main.py` or `.env`)
+    ```bash
+    sudo systemctl restart clipstream
+    ```
+
+2.  **Check if it's running:**
+    ```bash
+    sudo systemctl status clipstream
+    ```
+    (You should see a green "active (running)" dot).
+
+3.  **Restart Nginx (The Web Server):**
+    (Use this if you changed `signup.html` or Nginx config)
+    ```bash
+    sudo systemctl restart nginx
+    ```
+
+4.  **Restart Cloudflare Tunnel:**
+    (Only if the public URL isn't working)
+    ```bash
+    sudo systemctl restart cloudflared
+    ```
+
+---
+
+## 3. The "Hard Reset" (Server Reboot)
+If the server is acting weird or frozen.
+
+1.  **Reboot the machine:**
+    ```bash
+    sudo reboot
+    ```
+2.  **Wait 1-2 minutes.**
+3.  **Log back in:** `ssh root@...`
+4.  **Everything should start automatically** (if you enabled the services).
+    - Check status: `sudo systemctl status clipstream`

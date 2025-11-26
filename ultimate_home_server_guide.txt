@@ -1,0 +1,146 @@
+ULTIMATE HOME SERVER GUIDE: FROM ZERO TO HERO
+(Everything you need to know to run ClipStream Bot on an old PC)
+
+--------------------------------------------------------------------------------
+PART 1: THE PHYSICAL PREP (MAKING THE USB)
+--------------------------------------------------------------------------------
+You need: A USB Drive (8GB+) and your current computer.
+
+1. Download Ubuntu:
+   - Go to ubuntu.com/download/desktop
+   - Download "Ubuntu 22.04 LTS" (LTS means Long Term Support - it's stable).
+
+2. Download Etcher:
+   - Go to balena.io/etcher
+   - Download and install it.
+
+3. Flash the USB:
+   - Plug in your USB drive.
+   - Open BalenaEtcher.
+   - Select the Ubuntu ISO file you downloaded.
+   - Select your USB drive.
+   - Click "Flash!". (This erases the USB).
+
+--------------------------------------------------------------------------------
+PART 2: INSTALLING THE OS
+--------------------------------------------------------------------------------
+1. Plug the USB into your "Server PC".
+2. Turn it on and immediately spam the BIOS key.
+   - It is usually F2, F12, Delete, or Esc. (Google "Boot menu key for [Your PC Model]").
+3. In the menu, select "Boot from USB" (or "UEFI: SanDisk...").
+4. The Ubuntu Installer will start.
+   - Language: English.
+   - Keyboard: English.
+   - Network: Connect to Wi-Fi (Ethernet cable is 100x better if possible).
+   - Installation Type: "Erase disk and install Ubuntu".
+   - Profile: Name: "server", Password: "yourpassword" (Remember this!).
+5. Let it finish. It will ask you to remove the USB and press Enter.
+6. The PC will reboot. You are now running Linux!
+
+--------------------------------------------------------------------------------
+PART 3: SETTING UP THE ENVIRONMENT
+--------------------------------------------------------------------------------
+Open the "Terminal" app on Ubuntu. Run these commands one by one.
+(It will ask for your password. You won't see asterisks when typing it, that's normal).
+
+1. Update the system:
+   sudo apt update && sudo apt upgrade -y
+
+2. Install Python, Git, and Nginx:
+   sudo apt install python3-pip python3-venv git nginx -y
+
+--------------------------------------------------------------------------------
+PART 4: MOVING YOUR CODE (VIA GITHUB)
+--------------------------------------------------------------------------------
+We use GitHub to teleport your code from your Mac to the Server.
+
+ON YOUR MAC (VS CODE):
+1. Open the Source Control tab (Left sidebar, branch icon).
+2. Click "Publish to GitHub".
+3. Select "Public repository".
+4. It will upload your code.
+
+ON THE SERVER (UBUNTU TERMINAL):
+1. Clone the code:
+   git clone https://github.com/YOUR_GITHUB_USERNAME/clipstream-bot.git
+   cd clipstream-bot
+
+--------------------------------------------------------------------------------
+PART 5: INSTALLING THE BOT
+--------------------------------------------------------------------------------
+1. Create Virtual Environment:
+   python3 -m venv venv
+   source venv/bin/activate
+
+2. Install Libraries:
+   pip install -r requirements.txt
+   pip install gunicorn uvloop httptools
+
+3. Setup Secrets:
+   nano .env
+   (Paste your .env content here: API Keys, Firebase Path).
+   (Ctrl+X -> Y -> Enter to save).
+
+   *IMPORTANT:* You need the Firebase JSON file too.
+   - Easiest way: Open the JSON on your Mac, copy the text.
+   - On Server: `nano firebase_credentials.json`, paste it, save it.
+   - Update `.env` to point to this file.
+
+--------------------------------------------------------------------------------
+PART 6: GOING LIVE (CLOUDFLARE TUNNEL)
+--------------------------------------------------------------------------------
+1. Install Cloudflared:
+   curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb && sudo dpkg -i cloudflared.deb
+
+2. Start the Tunnel:
+   cloudflared tunnel --url http://localhost:8000
+
+3. Get the URL:
+   It will print a link: `https://something.trycloudflare.com`.
+   *This is your public link for testing!*
+
+4. Connect Custom Domain (Permanent):
+   - Go to Cloudflare Dashboard -> Access -> Tunnels.
+   - Create a Tunnel -> Follow instructions to link your server.
+   - "Public Hostname" tab: Add `clipdash.in` -> Service: `http://localhost:80`.
+
+--------------------------------------------------------------------------------
+PART 7: HOSTING WEBSITE + BOT (NGINX)
+--------------------------------------------------------------------------------
+1. Move HTML:
+   sudo mkdir -p /var/www/html
+   sudo cp signup.html /var/www/html/index.html
+
+2. Configure Nginx:
+   sudo nano /etc/nginx/sites-available/default
+
+   (Delete everything and paste this):
+   server {
+       listen 80;
+       server_name _;
+       location / {
+           root /var/www/html;
+           index index.html;
+           try_files $uri $uri/ =404;
+       }
+       location /webhook {
+           proxy_pass http://127.0.0.1:8000;
+           proxy_set_header Host $host;
+           proxy_set_header X-Real-IP $remote_addr;
+       }
+   }
+
+3. Restart Nginx:
+   sudo systemctl restart nginx
+
+--------------------------------------------------------------------------------
+PART 8: MAINTENANCE (KEEPING IT ALIVE)
+--------------------------------------------------------------------------------
+1. Keep it running:
+   Use `tmux` or `systemd` (as described in deployment_guide.txt) so it doesn't stop when you close the terminal.
+
+2. Updates:
+   Run `sudo apt update && sudo apt upgrade -y` once a month.
+
+3. Logs:
+   If it breaks, check logs: `journalctl -u clipstream` (if using systemd).

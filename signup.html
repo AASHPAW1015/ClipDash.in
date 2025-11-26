@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClipStream Bot | Signup</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-color: #6366f1;
+            --accent-hover: #4f46e5;
+            --error-color: #ef4444;
+            --success-color: #22c55e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2rem;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .message {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .message.success {
+            background-color: rgba(34, 197, 94, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            display: block;
+        }
+
+        .message.error {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--error-color);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>ClipStream Bot</h1>
+        <p class="subtitle">Connect your YouTube channel to Discord</p>
+
+        <form id="signupForm">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" placeholder="you@example.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="youtubeChannelUrl">YouTube Channel URL</label>
+                <input type="url" id="youtubeChannelUrl" placeholder="https://www.youtube.com/channel/UC..." required>
+            </div>
+
+            <div class="form-group">
+                <label for="discordWebhookUrl">Discord Webhook URL</label>
+                <input type="url" id="discordWebhookUrl" placeholder="https://discord.com/api/webhooks/..." required>
+            </div>
+
+            <button type="submit" id="submitBtn">Connect Channel</button>
+        </form>
+
+        <div id="messageBox" class="message"></div>
+
+        <div id="commandBox"
+            style="display:none; margin-top: 20px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 8px;">Copy this command into
+                Nightbot:</p>
+            <code id="nightbotCommand"
+                style="display: block; padding: 10px; background: #000; color: #22c55e; border-radius: 4px; font-family: monospace; word-break: break-all;"></code>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('signupForm');
+        const messageBox = document.getElementById('messageBox');
+        const submitBtn = document.getElementById('submitBtn');
+        const commandBox = document.getElementById('commandBox');
+        const nightbotCommand = document.getElementById('nightbotCommand');
+
+        // In production, this would be your real domain (e.g., https://www.clipdash.in)
+        const API_BASE_URL = "https://www.clipdash.in";
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Reset message
+            messageBox.className = 'message';
+            messageBox.textContent = '';
+            commandBox.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Connecting...';
+
+            const data = {
+                email: document.getElementById('email').value,
+                youtubeChannelUrl: document.getElementById('youtubeChannelUrl').value,
+                discordWebhookUrl: document.getElementById('discordWebhookUrl').value
+            };
+
+            try {
+                // Use the hardcoded URL for the API call too, if we want to test via ngrok
+                // Or keep using localhost for the signup call itself since we are local.
+                // Let's use localhost for the signup call to avoid ngrok latency/issues for the signup itself,
+                // BUT use the ngrok URL for the generated command.
+                const response = await fetch('http://127.0.0.1:8000/webhook/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    messageBox.textContent = `Success! Channel Connected.`;
+                    messageBox.classList.add('success');
+
+                    // Generate Command using the hardcoded public URL and Nightbot variable
+                    // $(channelid) automatically gets the ID of the channel where the command is run.
+                    // $(querystring) captures everything typed after !clip (e.g. "!clip epic fail" -> message="epic fail")
+                    const command = `$(urlfetch ${API_BASE_URL}/webhook/clip?channel_id=$(channelid)&user=$(user)&message=$(querystring))`;
+                    nightbotCommand.textContent = command;
+                    commandBox.style.display = 'block';
+
+                    // form.reset(); 
+                } else {
+                    throw new Error(result.detail || 'Failed to signup');
+                }
+            } catch (error) {
+                messageBox.textContent = `Error: ${error.message}`;
+                messageBox.classList.add('error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Connect Channel';
+            }
+        });
+    </script>
+</body>
+
+</html>

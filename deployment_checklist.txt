@@ -1,0 +1,45 @@
+# ClipStream Bot - Production Deployment Checklist & Improvements
+
+## 1. Performance & Concurrency
+
+### [CRITICAL] Async Database Wrapper
+- **Current Issue:** The `firebase-admin` SDK is synchronous. If the database is slow, it blocks the entire application, causing timeouts for other users.
+- **Fix:** Wrap all Firestore calls in `loop.run_in_executor`.
+- **Code Example:**
+  ```python
+  import asyncio
+  loop = asyncio.get_running_loop()
+  # Run blocking code in a separate thread
+  doc = await loop.run_in_executor(None, lambda: db.collection("...").document("...").get())
+  ```
+
+### [CRITICAL] Multiple Workers
+- **Current Issue:** `uvicorn main:app --reload` runs a single process. It uses only 1 CPU core.
+- **Fix:** In production, run with multiple workers to handle parallel requests.
+- **Command:** `uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4` (Adjust workers based on CPU cores).
+
+### [HIGH] Redis Caching
+- **Current Issue:** The `stream_start_cache` is a Python dictionary. It is not shared between workers. If you have 4 workers, each will hit the YouTube API separately.
+- **Fix:** Use Redis for caching.
+- **Benefit:** Shared cache across all workers and even multiple servers.
+
+## 2. Reliability & Security
+
+### [HIGH] Process Manager (Gunicorn)
+- **Recommendation:** Use Gunicorn as a process manager with Uvicorn workers. It handles restarting crashed workers and better load balancing.
+- **Command:** `gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app`
+
+### [MEDIUM] Error Tracking (Sentry)
+- **Recommendation:** Install `sentry-sdk` to track errors in real-time.
+- **Benefit:** Get email alerts when the bot crashes or fails to clip.
+
+### [MEDIUM] Rate Limiting
+- **Recommendation:** Use `fastapi-limiter` to prevent a single user from spamming the `!clip` command and exhausting your quota or crashing the server.
+
+## 3. Infrastructure
+
+### Reverse Proxy (Nginx)
+- **Recommendation:** Put Nginx in front of Uvicorn/Gunicorn to handle SSL (HTTPS), static files, and basic load balancing.
+
+### Domain Name
+- **Recommendation:** Buy a domain (e.g., `clipstream.bot`) and point it to your server IP. Replace the hardcoded Ngrok URL in `signup.html`.

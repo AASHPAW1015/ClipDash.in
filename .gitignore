@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+venv/
+env/
+.venv/
+
+# Environment Variables & Secrets
+.env
+*.json
+firebase_credentials.json
+serviceAccountKey.json
+
+# IDEs
+.vscode/
+.idea/
+.DS_Store
