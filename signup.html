@@ -149,8 +149,21 @@
             </div>
 
             <div class="form-group">
-                <label for="youtubeChannelUrl">YouTube Channel URL</label>
-                <input type="url" id="youtubeChannelUrl" placeholder="https://www.youtube.com/channel/UC..." required>
+                <label for="youtubeChannelId">YouTube Channel ID</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="youtubeChannelId" placeholder="UC..." required style="flex: 1;">
+                    <button type="button" id="checkChannelBtn"
+                        style="width: auto; margin-top: 0; padding: 12px; background: var(--card-bg); border: 1px solid rgba(255,255,255,0.1);"
+                        title="Verify Channel Link">
+                        <!-- External Link Icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <div class="form-group">
@@ -164,11 +177,23 @@
         <div id="messageBox" class="message"></div>
 
         <div id="commandBox"
-            style="display:none; margin-top: 20px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+            style="display:none; margin-top: 20px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); position: relative;">
             <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 8px;">Copy this command into
                 Nightbot:</p>
-            <code id="nightbotCommand"
-                style="display: block; padding: 10px; background: #000; color: #22c55e; border-radius: 4px; font-family: monospace; word-break: break-all;"></code>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <code id="nightbotCommand"
+                    style="display: block; flex: 1; padding: 10px; background: #000; color: #22c55e; border-radius: 4px; font-family: monospace; word-break: break-all;"></code>
+                <button type="button" id="copyBtn"
+                    style="width: auto; margin-top: 0; padding: 10px; background: var(--accent-color);"
+                    title="Copy to Clipboard">
+                    <!-- Copy Icon -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -178,6 +203,30 @@
         const submitBtn = document.getElementById('submitBtn');
         const commandBox = document.getElementById('commandBox');
         const nightbotCommand = document.getElementById('nightbotCommand');
+        const checkChannelBtn = document.getElementById('checkChannelBtn');
+        const copyBtn = document.getElementById('copyBtn');
+
+        // Verify Channel ID Logic
+        checkChannelBtn.addEventListener('click', () => {
+            const channelId = document.getElementById('youtubeChannelId').value.trim();
+            if (channelId) {
+                window.open(`https://www.youtube.com/channel/${channelId}`, '_blank');
+            } else {
+                alert("Please enter a Channel ID first.");
+            }
+        });
+
+        // Copy Logic
+        copyBtn.addEventListener('click', () => {
+            const commandText = nightbotCommand.textContent;
+            navigator.clipboard.writeText(commandText).then(() => {
+                const originalText = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>'; // Checkmark
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalText;
+                }, 2000);
+            });
+        });
 
         // In production, this would be your real domain (e.g., https://www.clipdash.in)
         const API_BASE_URL = "https://www.clipdash.in";
@@ -192,9 +241,14 @@
             submitBtn.disabled = true;
             submitBtn.textContent = 'Connecting...';
 
+            const channelId = document.getElementById('youtubeChannelId').value.trim();
+
+            // Construct full URL for backend
+            const fullChannelUrl = `https://www.youtube.com/channel/${channelId}`;
+
             const data = {
                 email: document.getElementById('email').value,
-                youtubeChannelUrl: document.getElementById('youtubeChannelUrl').value,
+                youtubeChannelUrl: fullChannelUrl,
                 discordWebhookUrl: document.getElementById('discordWebhookUrl').value
             };
 
