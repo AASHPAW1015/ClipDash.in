@@ -81,6 +81,34 @@ cloudflared tunnel route dns clip-server www.clipdash.in
 cloudflared tunnel run --url http://localhost:8000 clip-server
 ```
 
+### 8. SSH Access (Remote Management)
+To manage your server from anywhere without a VPN:
+
+**On the Server:**
+1.  Create `~/.cloudflared/config.yml`:
+    ```yaml
+    tunnel: YOUR_TUNNEL_ID
+    credentials-file: /home/clipdash/.cloudflared/YOUR_TUNNEL_ID.json
+    ingress:
+      - hostname: ssh.clipdash.in
+        service: ssh://127.0.0.1:22
+      - hostname: clipdash.in
+        service: http://127.0.0.1:8000
+      - hostname: www.clipdash.in
+        service: http://127.0.0.1:8000
+      - service: http_status:404
+    ```
+2.  Run with config: `cloudflared tunnel run clip-final`
+
+**On your Laptop (Client):**
+1.  Edit `~/.ssh/config`:
+    ```text
+    Host ssh.clipdash.in
+        User clipdash
+        ProxyCommand /opt/homebrew/bin/cloudflared access ssh --hostname %h
+    ```
+2.  Connect: `ssh clipdash@ssh.clipdash.in`
+
 ### 8. Nginx Setup (Serving the Website)
 ```bash
 # 1. Move Signup Page
