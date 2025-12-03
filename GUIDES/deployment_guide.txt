@@ -157,3 +157,27 @@ PHASE 7: SSL (THE GREEN LOCK)
    certbot --nginx -d YOUR_DOMAIN.com
 
 DONE! Your bot is now live at https://YOUR_DOMAIN.com
+
+--------------------------------------------------------------------------------
+PHASE 8: ROUTINE DEPLOYMENT (CHEAT SHEET)
+--------------------------------------------------------------------------------
+Every time you push new code to GitHub, run these commands to update the server:
+
+1.  **Connect to Server:**
+    `ssh clipdash@ssh.clipdash.in`
+
+2.  **Go to Code Folder:**
+    `cd ClipDash.in`
+
+3.  **Download Changes:**
+    `git pull`
+    *(If it says "local changes", run: `git reset --hard origin/master` then `git pull`)*
+
+4.  **Update Website (Frontend):**
+    `sudo cp signup.html /var/www/html/index.html`
+
+5.  **Restart Bot (Backend):**
+    *(Only if you changed main.py or .env)*
+    `sudo systemctl restart clipstream`
+
+--------------------------------------------------------------------------------
