@@ -203,7 +203,7 @@
                 // Or keep using localhost for the signup call itself since we are local.
                 // Let's use localhost for the signup call to avoid ngrok latency/issues for the signup itself,
                 // BUT use the ngrok URL for the generated command.
-                const response = await fetch('http://127.0.0.1:8000/webhook/signup', {
+                const response = await fetch('http://www.clipdash.in/webhook/signup', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
