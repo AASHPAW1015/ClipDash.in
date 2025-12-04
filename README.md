@@ -168,3 +168,12 @@ lsof -i :8000 | grep LISTEN | awk '{print $2}' | xargs kill -9
 ### 5. Usage
 - Type `!clip` in YouTube Chat.
 - Type `!clip Title of the clip` to add a title.
+
+--------------------------------------------------------------------------------
+
+## ⚖️ License
+
+**Copyright © 2025 ClipDash.in (Aashpaw). All Rights Reserved.**
+
+This project is proprietary software. Unauthorized copying, modification, distribution, or use for commercial purposes is strictly prohibited.
+See the [LICENSE](LICENSE) file for details.
