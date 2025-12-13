@@ -1,0 +1,64 @@
+STEVE (HOME SERVER) - OPERATION MANUAL
+========================================
+
+This guide is for when you need to manually wake up Steve or feed him new code.
+
+PART 1: WAKING UP STEVE (Emergency Start)
+-----------------------------------------
+If the server rebooted and the website is DOWN (Error 520/530), run these commands to start things manually.
+
+1.  **Connect to Steve:**
+    ssh clipdash@ssh.clipdash.in
+    (If this fails, you need physical access to fix the internet/tunnel first).
+
+2.  **Start the Tunnel (Cloudflare):**
+    # Check if it's running
+    sudo systemctl status cloudflared
+
+    # If DEAD, start it manually:
+    cloudflared tunnel run
+
+3.  **Start the Bot (Uvicorn):**
+    # Check if it's running
+    sudo systemctl status clipstream
+
+    # If DEAD, start it manually:
+    cd ClipDash.in
+    source venv/bin/activate
+    uvicorn main:app --host 0.0.0.0 --port 8000
+
+PART 2: FEEDING STEVE (Deploying Code)
+--------------------------------------
+How to move code from your Mac to Steve.
+
+1.  **On Mac (Push):**
+    # Save your changes
+    git add .
+    git commit -m "New features for Steve"
+    
+    # Send to GitHub
+    git push
+
+2.  **On Steve (Pull):**
+    # Teleport to Steve
+    ssh clipdash@ssh.clipdash.in
+
+    # Go to the folder
+    cd ClipDash.in
+
+    # Download updates
+    git pull
+    
+    # (Optional) If you get "local changes error":
+    git reset --hard origin/master
+    git pull
+
+3.  **Update the Face (Frontend):**
+    # If you changed signup.html, copy it to the web folder
+    sudo cp signup.html /var/www/html/index.html
+
+4.  **Restart the Brain (Backend):**
+    # If you changed python code, restart the bot
+    sudo systemctl restart clipstream
+
+DONE. Steve is fed and happy.
