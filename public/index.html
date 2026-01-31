@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#050a14">
+    <title>ClipDash - Automate Your Clips</title>
+    <!-- Favicon -->
+    <link rel="icon" href="assets/clipdashtab-removedbg.png">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <!-- Parallax Background -->
+    <div class="parallax-container">
+        <!-- Back Layer (Slower, Darker) -->
+        <div class="parallax-layer layer-back">
+            <i class="fab fa-discord p-icon" style="top: 15%; left: 10%;"></i>
+            <i class="fab fa-youtube p-icon" style="top: 25%; right: 15%;"></i>
+            <i class="fas fa-desktop p-icon" style="top: 60%; left: 20%;"></i>
+            <i class="fas fa-comment-dots p-icon" style="top: 70%; right: 25%;"></i>
+            <i class="fas fa-video p-icon" style="top: 40%; left: 80%;"></i>
+        </div>
+
+        <!-- Front Layer (Faster, Brighter) -->
+        <div class="parallax-layer layer-front">
+            <i class="fab fa-discord p-icon" style="top: 40%; left: 5%;"></i>
+            <i class="fas fa-gamepad p-icon" style="top: 10%; right: 30%;"></i>
+            <i class="fab fa-youtube p-icon" style="top: 80%; left: 85%;"></i>
+            <i class="fas fa-bolt p-icon" style="top: 55%; right: 5%;"></i>
+        </div>
+    </div>
+
+    <!-- Instructions Modal -->
+    <div id="instructionsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>📖 Setup Instructions</h2>
+            <!-- PDF Viewer -->
+            <div class="pdf-container">
+                <iframe src="assets/instructions.pdf" width="100%" height="400px">
+                </iframe>
+            </div>
+            <div class="modal-actions">
+                <a href="assets/instructions.pdf" download class="btn btn-secondary">
+                    <i class="fas fa-download"></i> Download PDF
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="landing-section">
+            <!-- Logo Header -->
+            <header class="header">
+                <div class="logo">
+                    <img src="assets/clipdash-1.svg" alt="ClipDash Logo" class="logo-img">
+                </div>
+            </header>
+
+            <!-- Hero Section -->
+            <section class="hero">
+                <h1>Turn Stream Moments into Clips Instantly</h1>
+                <p class="subtitle">Connect Nightbot to Discord and let your chat do the clipping.</p>
+                <div class="separator"></div>
+            </section>
+        </div>
+
+        <!-- How It Works -->
+        <section class="how-it-works">
+            <div class="step">
+                <div class="icon-box">
+                    <img src="assets/ytdis.drawio.svg" alt="Add YouTube & Discord">
+                </div>
+                <h3>1. Add YouTube & Discord</h3>
+                <p>Enter your Channel ID and Webhook URL below.</p>
+            </div>
+
+            <div class="step-arrow">
+                <img src="assets/arrow.drawio.svg" alt="Arrow">
+            </div>
+
+            <div class="step">
+                <div class="icon-box">
+                    <img src="assets/clipbox.drawio.svg" alt="Type !clip">
+                </div>
+                <h3>2. Type !clip in Chat</h3>
+                <p>While live, anyone can trigger a clip.</p>
+            </div>
+
+            <div class="step-arrow">
+                <img src="assets/arrow.drawio.svg" alt="Arrow">
+            </div>
+
+            <div class="step">
+                <div class="icon-box">
+                    <img src="assets/dashdis.drawio.svg" alt="Get Link">
+                </div>
+                <h3>3. Get Link in Discord</h3>
+                <p>The clip is instantly sent to your server.</p>
+            </div>
+        </section>
+
+        <!-- Instructions CTA -->
+        <div class="cta-container">
+            <button id="openInstructionsBtn" class="btn btn-info">
+                <i class="fas fa-book-open"></i> View Instructions
+            </button>
+        </div>
+
+        <!-- Connect Form -->
+        <section class="connect-section">
+            <div class="card">
+                <h2>Connect Your YouTube & Discord</h2>
+
+                <form id="connectForm">
+                    <div class="form-group">
+                        <label for="emailInput">Email Address</label>
+                        <input type="email" id="emailInput" placeholder="you@example.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="channelUrl">YouTube Channel URL (or ID)</label>
+                        <input type="text" id="channelUrl" placeholder="https://youtube.com/channel/UC..." required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="webhookUrl">Discord Webhook URL</label>
+                        <input type="text" id="webhookUrl" placeholder="https://discord.com/api/webhooks/..." required>
+                    </div>
+
+                    <p class="security-note"><i class="fas fa-lock"></i> Your information is secure.</p>
+
+                    <button type="submit" class="btn btn-primary" id="connectBtn">Connect</button>
+                </form>
+
+                <!-- Success State (Hidden by default) -->
+                <div id="successState" class="hidden">
+                    <div class="success-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3>Connected!</h3>
+                    <p>Copy this command into your Nightbot dashboard:</p>
+
+                    <div class="command-box">
+                        <code id="nightbotCommand">$(urlfetch https://...)</code>
+                        <button id="copyBtn" class="btn-icon" title="Copy"><i class="fas fa-copy"></i></button>
+                    </div>
+                    <p class="success-hint">Done! Type !clip in your chat to test.</p>
+                    <button id="resetBtn" class="btn btn-text">Connect Another</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="contact-links">
+                <a href="mailto:clipdash.in@gmail.com"><i class="fas fa-envelope"></i> clipdash.in@gmail.com</a>
+            </div>
+            <p>&copy; 2026 ClipDash. All rights reserved under 3 State Empire.</p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/app.js"></script>
+</body>
+
+</html>

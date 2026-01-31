@@ -9,6 +9,8 @@ import httpx
 import firebase_admin
 from firebase_admin import credentials, firestore
 from fastapi import FastAPI, HTTPException, Query, BackgroundTasks
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, HttpUrl, validator
 from dotenv import load_dotenv
@@ -56,6 +58,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount Static Files (Serve CSS, JS, Assets)
+app.mount("/css", StaticFiles(directory="public/css"), name="css")
+app.mount("/js", StaticFiles(directory="public/js"), name="js")
+app.mount("/assets", StaticFiles(directory="public/assets"), name="assets")
+
 # --- Models ---
 class SignupRequest(BaseModel):
     email: str
@@ -94,13 +101,12 @@ async def send_discord_notification(webhook_url: str, message: str):
 
 # --- Routes ---
 
-from fastapi.responses import FileResponse
 
 # ... (existing imports)
 
 @app.get("/")
 async def read_root():
-    return FileResponse("signup.html")
+    return FileResponse("public/index.html")
 
 @app.post("/webhook/signup")
 async def signup(request: SignupRequest):
