@@ -68,6 +68,12 @@ connectForm.addEventListener('submit', async (e) => {
             })
         });
 
+        // Guard: if server returns HTML (e.g. proxy error), don't try to parse as JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            throw new Error('Server is temporarily unavailable. Please try again in a moment.');
+        }
+
         const data = await response.json();
 
         if (!response.ok) {
