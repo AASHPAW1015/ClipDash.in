@@ -1,0 +1,14 @@
+[Unit]
+Description=Cloudflare Tunnel for ClipDash
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=clipdash
+Group=clipdash
+ExecStart=/usr/local/bin/cloudflared tunnel --config /home/clipdash/.cloudflared/config.yml run
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
